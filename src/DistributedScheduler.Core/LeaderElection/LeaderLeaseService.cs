@@ -88,7 +88,7 @@ public class LeaderLeaseService
                 _logger.LogWarning("Node {NodeId} lost leadership", _nodeId);
             }
 
-            AppMetrics.IsLeader.WithLabels(_nodeId).Set(wonLease ? 1 : 0);
+            AppMetrics.IsLeader.Set(wonLease ? 1 : 0);
             _isLeader = wonLease;
             return wonLease;
         }
@@ -96,7 +96,7 @@ public class LeaderLeaseService
         {
             // Upsert race: another node upserted first. We simply didn't win this round.
             _logger.LogDebug(ex, "Lease acquisition contention for node {NodeId}", _nodeId);
-            AppMetrics.IsLeader.WithLabels(_nodeId).Set(0);
+            AppMetrics.IsLeader.Set(0);
             _isLeader = false;
             return false;
         }

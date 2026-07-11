@@ -37,8 +37,7 @@ public static class AppMetrics
 
     public static readonly Gauge IsLeader = Prometheus.Metrics.CreateGauge(
         "scheduler_is_leader",
-        "1 if this node currently holds the leader lease, 0 otherwise",
-        new GaugeConfiguration { LabelNames = new[] { "node_id" } });
+        "1 if this node currently holds the leader lease, 0 otherwise");
 
     public static readonly Histogram JobExecutionDuration = Prometheus.Metrics.CreateHistogram(
         "scheduler_job_execution_duration_seconds",

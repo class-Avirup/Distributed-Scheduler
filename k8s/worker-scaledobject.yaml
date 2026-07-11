@@ -1,0 +1,26 @@
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: worker-scaledobject
+spec:
+  scaleTargetRef:
+    name: worker-deployment
+  pollingInterval: 15
+  cooldownPeriod: 120
+  minReplicaCount: 1
+  maxReplicaCount: 20
+  triggers:
+    - type: kafka
+      metadata:
+        bootstrapServers: kafka.default.svc.cluster.local:9092
+        consumerGroup: job-executors     # matches GroupId in JobExecutorBackgroundService.cs
+        topic: jobs.pending              # confirm against Topics.Pending's actual string value
+        lagThreshold: "50"
+        offsetResetPolicy: earliest       # matches AutoOffsetReset.Earliest in the consumer config
+    - type: kafka
+      metadata:
+        bootstrapServers: kafka.default.svc.cluster.local:9092
+        consumerGroup: job-executors     # same group also consumes Topics.Retry
+        topic: jobs.retry                # confirm against Topics.Retry's actual string value
+        lagThreshold: "50"
+        offsetResetPolicy: earliest

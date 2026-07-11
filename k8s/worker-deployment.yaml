@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: worker-deployment
+  labels:
+    app: worker
+spec:
+  # No `replicas:` field -- KEDA's ScaledObject takes ownership of this via HPA
+  selector:
+    matchLabels:
+      app: worker
+  template:
+    metadata:
+      labels:
+        app: worker
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9090"
+    spec:
+      terminationGracePeriodSeconds: 15   # > Scheduler:LeaseSeconds (10), gives ReleaseAsync room to finish
+      containers:
+        - name: worker
+          image: distributedscheduler-worker-1:latest
+          imagePullPolicy: Never
+          env:
+            - name: Mongo__ConnectionString
+              value: mongodb://mongo:27017
+            - name: Kafka__BootstrapServers
+              value: kafka:9092
+            # NODE_ID intentionally omitted -- Program.cs falls back to
+            # Environment.MachineName, which equals the pod name in k8s
+          ports:
+            - containerPort: 9090
+              name: metrics
